@@ -3,7 +3,7 @@ package com.software.courseScheduler;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.util.Calendar;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +13,9 @@ import org.springframework.stereotype.Service;
 
 import com.software.courseScheduler.Course.*;
 import com.software.courseScheduler.DeadLine.*;
+import com.software.courseScheduler.Enrollment.EnrollmentModel;
+import com.software.courseScheduler.Enrollment.EnrollmentRepo;
+import com.software.courseScheduler.Student.*;
 import com.software.courseScheduler.TimeBlock.*;
 
 import reactor.core.publisher.Mono;
@@ -23,6 +26,10 @@ public class CourseSchedulerService {
 	private CourseRepo courseRepo;
 	@Autowired
 	private ChapterRepo chapterRepo;
+	@Autowired
+	private StudentRepo studentRepo;
+	@Autowired
+	private EnrollmentRepo enrollmentRepo;
 	@Autowired
 	private DeadlineRepo deadlineRepo;
 	@Autowired
@@ -35,6 +42,62 @@ public class CourseSchedulerService {
 				.flatMap(savedCourse -> Mono.just(
 						ResponseEntity.ok(
 								Map.of("message", "Course succesfully added to database"))));
+	}
+
+	public Mono<ResponseEntity<Map<String, List<CourseModel>>>> getAllCourse(Long studentId) {
+		return enrollmentRepo
+				.findAll()
+				.filter(enrollment -> enrollment.getStudentId() == studentId)
+				.flatMap(enrollment -> courseRepo.findById(enrollment.getCouserId()))
+				.collectList()
+				.flatMap(course -> Mono.just(
+						ResponseEntity.ok(
+								Map.of("course", course))));
+	}
+
+	public Mono<ResponseEntity<Map<CourseModel, List<ChapterModel>>>> getCourseById(Long courseId) {
+		return courseRepo.findById(courseId)
+				.flatMap(course -> chapterRepo.findByCourseId(courseId)
+						.collectList()
+						.flatMap(chapters -> Mono.just(ResponseEntity.ok().body(Map.of(course, chapters)))));
+	}
+
+	public Mono<ResponseEntity<Map<String, String>>> addStudent(StudentModel student) {
+		return studentRepo
+				.save(student)
+				.flatMap(savedStudent -> Mono.just(
+						ResponseEntity.ok(
+								Map.of("message", "Student succesfully added to database"))));
+	}
+
+	public Mono<ResponseEntity<Map<String, String>>> updateStudent(StudentModel student) {
+		return studentRepo.findById(student.getId())
+				.flatMap(existingStudent -> {
+					existingStudent.setYear(student.getYear());
+					existingStudent.setGrade(student.getGrade());
+					existingStudent.setFirstName(student.getFirstName());
+					existingStudent.setLastName(student.getLastName());
+					existingStudent.setDepartment(student.getDepartment());
+					return studentRepo.save(existingStudent).flatMap(savedStudent -> Mono.just(
+							ResponseEntity.ok(
+									Map.of("message", "Student succesfully updated profile"))));
+				});
+	}
+
+	public Mono<ResponseEntity<Map<String, List<StudentModel>>>> getAllStudents() {
+		return studentRepo
+				.findAll()
+				.collectList()
+				.flatMap(student -> Mono.just(
+						ResponseEntity.ok(
+								Map.of("students", student))));
+	}
+
+	public Mono<ResponseEntity<Map<StudentModel, List<CourseModel>>>> getStudentProfileById(Long studentId) {
+		return studentRepo.findById(studentId)
+				.flatMap(student -> enrollmentRepo.findByStudentId(studentId)
+						.collectList()
+						.flatMap(courses -> Mono.just(ResponseEntity.ok().body(Map.of(student, courses)))));
 	}
 
 	public Mono<ResponseEntity<Map<String, String>>> addChapter(ChapterModel chapter) {
@@ -53,6 +116,24 @@ public class CourseSchedulerService {
 				.switchIfEmpty(Mono.just(
 						ResponseEntity.status(HttpStatus.NOT_FOUND)
 								.body(Map.of("message", "Can't add chapter no course found with that id"))));
+	}
+
+	public Mono<ResponseEntity<Map<String, String>>> enrollCourse(EnrollmentModel enrollment) {
+		Mono<Boolean> studentExist = studentRepo.existsById(enrollment.getStudentId());
+		Mono<Boolean> courseExist = courseRepo.existsById(enrollment.getCouserId());
+		return Mono.zip(studentExist, courseExist)
+				.flatMap(tuple -> {
+					Boolean studentExists = tuple.getT1();
+					Boolean courseExists = tuple.getT2();
+					if (studentExists && courseExists) {
+						return enrollmentRepo.save(enrollment)
+								.flatMap(savedEnrolment -> Mono
+										.just(ResponseEntity.ok().body(Map.of("message", "Successfully added students"))));
+					} else {
+						return Mono
+								.just(ResponseEntity.badRequest().body(Map.of("message", "student id or course id  doesn't exist")));
+					}
+				});
 	}
 	// Helper method to check if two time blocks overlap
 
@@ -140,12 +221,4 @@ public class CourseSchedulerService {
 
 	}
 
-	public Mono<ResponseEntity<Map<String, String>>> createDeadline(DeadlineModel deadline) { // taking deadline as just
-																																														// incomming exam
-		//
-		// calculate how many studyHour is the deadline consider the time(if is it close
-		// or not) consider the weight of the deadline(compulative weight of the
-		// chapters weight)
-		// create a time blocks from current time to deadlineTime
-	}
 }
