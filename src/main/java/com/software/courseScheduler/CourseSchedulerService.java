@@ -77,57 +77,61 @@ public class CourseSchedulerService {
 				.filter(timeBlock -> isOverlapping(newTimeBlock, timeBlock))
 				.next()
 				.flatMap( // only if it has overlap
-						overlapingTimeBlock -> {
+						overlappingTimeBlock -> {
 							LocalDateTime prevStartTime = newTimeBlock.getStartTime().toLocalDateTime();
 							LocalDateTime prevEndTime = newTimeBlock.getEndTime().toLocalDateTime();
-							LocalDateTime startTime = overlapingTimeBlock.getStartTime().toLocalDateTime();
-							LocalDateTime endTime = overlapingTimeBlock.getEndTime().toLocalDateTime();
+							LocalDateTime overlappingStartTime = overlappingTimeBlock.getStartTime().toLocalDateTime();
+							LocalDateTime endTime = overlappingTimeBlock.getEndTime().toLocalDateTime();
 
 							Duration gap = Duration.ofMinutes(1); // 1 min gap
-							if (overlapingTimeBlock.getPriority() > newTimeBlock.getPriority()) { // TODO: refactor
+							Duration duration1 = Duration.between(prevStartTime, endTime);
+							Duration duration = Duration.between(prevStartTime, prevEndTime);
+							if (overlappingTimeBlock.getPriority() > newTimeBlock.getPriority()) { // TODO: refactor
 
-								Duration duration1 = Duration.between(prevStartTime, endTime);
-								Duration duration2 = Duration.between(prevEndTime, endTime);
-								Duration duration = Duration.between(prevStartTime, prevEndTime);
 								// newTimeBlock needs to be adjusted
 
-								int compareValue = duration1.compareTo(duration2);
-								if (compareValue <= 0) { // duration1 min
+								int compareValue = overlappingStartTime.compareTo(prevStartTime);
+								if (compareValue <= 0) { // startTime before prevStartTime
 									Timestamp newStartTime = Timestamp.valueOf(prevStartTime.plus(duration1).plus(gap));
-									Timestamp newEndTime = Timestamp.valueOf(prevEndTime.plus(duration1).plus(gap));
+									Timestamp newEndTime = Timestamp.valueOf(prevEndTime.plus(duration1));
 									// shift the newTimeBlock
 									newTimeBlock.setStartTime(newStartTime);
 									newTimeBlock.setEndTime(newEndTime);
-								} else { // duration2 min
-									Timestamp newStartTime = Timestamp.valueOf(prevStartTime.plus(duration2).plus(duration));
-									Timestamp newEndTime = Timestamp.valueOf(prevEndTime.plus(duration2).plus(duration));
+								} else { // startTime after prevStartTime
+									Timestamp newStartTime = Timestamp.valueOf(prevEndTime.plus(gap));
+									Timestamp newEndTime = Timestamp.valueOf(prevEndTime.plus(duration));
 									// shift the newTimeBlock
 									newTimeBlock.setStartTime(newStartTime);
 									newTimeBlock.setEndTime(newEndTime);
 								}
 							} else {
-								// overlapingTimeBlock needs to be adjusted
-								Duration duration1 = Duration.between(startTime, prevEndTime);
-								Duration duration2 = Duration.between(prevEndTime, endTime);
-								Duration duration = Duration.between(startTime, endTime);
+								Duration durationOverlapping = Duration.between(overlappingStartTime, endTime);
 
-								int compareValue = duration1.compareTo(duration2);
-								if (compareValue <= 0) { // duration1 min
-									Timestamp newStartTime = Timestamp.valueOf(prevStartTime.plus(duration1).plus(gap));
-									Timestamp newEndTime = Timestamp.valueOf(prevEndTime.plus(duration1).plus(gap));
+								int compareValue = overlappingStartTime.compareTo(prevStartTime);
+								if (compareValue <= 0) { // startTime before prevStartTime
+									LocalDateTime newStartTime = overlappingStartTime;
+									LocalDateTime newEndTime = overlappingStartTime.plus(duration);
 									// shift the newTimeBlock
-									overlapingTimeBlock.setStartTime(newStartTime);
-									overlapingTimeBlock.setEndTime(newEndTime);
-								} else { // duration2 min
-									Timestamp newStartTime = Timestamp.valueOf(prevStartTime.plus(duration2).plus(duration));
-									Timestamp newEndTime = Timestamp.valueOf(prevEndTime.plus(duration2).plus(duration));
-									// shift the newTimeBlock
-									overlapingTimeBlock.setStartTime(newStartTime);
-									overlapingTimeBlock.setEndTime(newEndTime);
+									newTimeBlock.setStartTime(Timestamp.valueOf(newStartTime));
+									newTimeBlock.setEndTime(Timestamp.valueOf(newEndTime));
+									// shift the overlapping timeblock
+									LocalDateTime newOverlappingStartTime = newEndTime.plus(gap);
+									LocalDateTime newOverlappingEndTime = newOverlappingStartTime.plus(durationOverlapping);
+
+									overlappingTimeBlock.setStartTime(Timestamp.valueOf(newOverlappingStartTime));
+									overlappingTimeBlock.setEndTime(Timestamp.valueOf(newOverlappingEndTime));
+
+								} else { // startTime after prevStartTime
+									// shift the overlapping timeblock
+									LocalDateTime newOverlappingStartTime = prevEndTime.plus(gap);
+									LocalDateTime newOverlappingEndTime = newOverlappingStartTime.plus(durationOverlapping);
+
+									overlappingTimeBlock.setStartTime(Timestamp.valueOf(newOverlappingStartTime));
+									overlappingTimeBlock.setEndTime(Timestamp.valueOf(newOverlappingEndTime));
 								}
 
 							}
-							return Mono.just(overlapingTimeBlock);
+							return Mono.just(overlappingTimeBlock);
 						});
 		return timeBlockRepo.save(newTimeBlock).flatMap(
 				savedTimeBlock -> Mono.just(
