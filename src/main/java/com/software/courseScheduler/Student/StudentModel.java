@@ -1,13 +1,15 @@
 package com.software.courseScheduler.Student;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("Course")
+@Table("Student")
 public class StudentModel {
 	@Id
 	Long id;
-	String student_id;
+	@Column("student_id")
+	String studentId;
 	String first_name;
 	String last_name;
 	String department;
@@ -19,7 +21,7 @@ public class StudentModel {
 	}
 
 	public String getStudentId() {
-		return student_id;
+		return studentId;
 	}
 
 	public String getFirstName() {
@@ -43,7 +45,7 @@ public class StudentModel {
 	}
 
 	public void setStudentId(String student_id) {
-		this.student_id = student_id;
+		this.studentId = student_id;
 	}
 
 	public void setFirstName(String first_name) {

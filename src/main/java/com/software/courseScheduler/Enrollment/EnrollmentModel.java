@@ -1,22 +1,26 @@
 package com.software.courseScheduler.Enrollment;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table("Enrollment")
 public class EnrollmentModel {
 	@Id
-	Long course_id;
-	Long student_id;
+	Long id;
+	@Column("course_id")
+	Long courseId;
+	@Column("student_id")
+	Long studentId;
 	int year;
 
 	// getters
 	public Long getCourseId() {
-		return course_id;
+		return courseId;
 	}
 
 	public Long getStudentId() {
-		return student_id;
+		return studentId;
 	}
 
 	public int getYear() {
@@ -25,11 +29,11 @@ public class EnrollmentModel {
 
 	// setters
 	public void setStudentId(Long student_id) {
-		this.student_id = student_id;
+		this.studentId = student_id;
 	}
 
 	public void setCourseId(Long course_id) {
-		this.course_id = course_id;
+		this.courseId = course_id;
 	}
 
 	public void setYear(int year) {

@@ -1,12 +1,14 @@
 package com.software.courseScheduler.Course;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Table("Course")
 public class CourseModel {
 	@Id
-	Long course_id;
+	@Column("course_id")
+	Long courseId;
 	String name;
 	String status; // current, passed(completed), failed
 	int credit_hour;
@@ -14,7 +16,7 @@ public class CourseModel {
 
 	// getters
 	public Long getCourseId() {
-		return course_id;
+		return courseId;
 	}
 
 	public String getName() {

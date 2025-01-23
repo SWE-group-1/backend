@@ -3,19 +3,23 @@ package com.software.courseScheduler.TimeBlock;
 import java.sql.Timestamp;
 
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-@Table("Timeblock")
+@Table("Timeblocks")
 public class TimeBlockModel {
 	@Id
 	Long id;
-	Long student_id;
+	@Column("student_id")
+	Long studentId;
 	String week_day;
 	int week_number;
 	int priority;
 
-	Timestamp start_time;
-	Timestamp end_time;
+	@Column("start_time")
+	Timestamp startTime;
+	@Column("end_time")
+	Timestamp endTime;
 
 	// getters
 	public Long getId() {
@@ -23,7 +27,7 @@ public class TimeBlockModel {
 	}
 
 	public Long getStudentId() {
-		return student_id;
+		return studentId;
 	}
 
 	public int getPriority() {
@@ -39,16 +43,16 @@ public class TimeBlockModel {
 	}
 
 	public Timestamp getStartTime() {
-		return start_time;
+		return startTime;
 	}
 
 	public Timestamp getEndTime() {
-		return end_time;
+		return endTime;
 	}
 
 	// setter
 	public void setStudentId(Long student_id) {
-		this.student_id = student_id;
+		this.studentId = student_id;
 	}
 
 	public void setPriority(int priority) {
@@ -64,11 +68,11 @@ public class TimeBlockModel {
 	}
 
 	public void setStartTime(Timestamp start_time) {
-		this.start_time = start_time;
+		this.startTime = start_time;
 	}
 
 	public void setEndTime(Timestamp end_time) {
-		this.end_time = end_time;
+		this.endTime = end_time;
 	}
 
 }
