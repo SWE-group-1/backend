@@ -6,15 +6,15 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("Course")
 public class CourseModel {
 	@Id
-	Long couser_id;
+	Long course_id;
 	String name;
 	String status; // current, passed(completed), failed
 	int credit_hour;
 	int weight;
 
 	// getters
-	public Long getCouserId() {
-		return couser_id;
+	public Long getCourseId() {
+		return course_id;
 	}
 
 	public String getName() {

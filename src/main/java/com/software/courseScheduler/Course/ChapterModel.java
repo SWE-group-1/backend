@@ -10,7 +10,7 @@ public class ChapterModel {
 	String name;
 	int page_length;
 	int weight;
-	Long couser_id;
+	Long course_id;
 
 	// getters
 	public Long getChapterId() {
@@ -29,8 +29,8 @@ public class ChapterModel {
 		return weight;
 	}
 
-	public Long getCouserId() {
-		return couser_id;
+	public Long getCourseId() {
+		return course_id;
 	}
 
 	// setters
@@ -46,8 +46,8 @@ public class ChapterModel {
 		this.weight = weight;
 	}
 
-	public void setCouserId(Long couser_id) {
-		this.couser_id = couser_id;
+	public void setCourseId(Long course_id) {
+		this.course_id = course_id;
 	}
 
 }

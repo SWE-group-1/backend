@@ -6,13 +6,13 @@ import org.springframework.data.relational.core.mapping.Table;
 @Table("Enrollment")
 public class EnrollmentModel {
 	@Id
-	Long couser_id;
+	Long course_id;
 	Long student_id;
 	int year;
 
 	// getters
-	public Long getCouserId() {
-		return couser_id;
+	public Long getCourseId() {
+		return course_id;
 	}
 
 	public Long getStudentId() {
@@ -29,7 +29,7 @@ public class EnrollmentModel {
 	}
 
 	public void setCourseId(Long course_id) {
-		this.couser_id = course_id;
+		this.course_id = course_id;
 	}
 
 	public void setYear(int year) {

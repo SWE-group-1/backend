@@ -48,7 +48,7 @@ public class CourseSchedulerService {
 		return enrollmentRepo
 				.findAll()
 				.filter(enrollment -> enrollment.getStudentId() == studentId)
-				.flatMap(enrollment -> courseRepo.findById(enrollment.getCouserId()))
+				.flatMap(enrollment -> courseRepo.findById(enrollment.getCourseId()))
 				.collectList()
 				.flatMap(course -> Mono.just(
 						ResponseEntity.ok(
@@ -102,7 +102,7 @@ public class CourseSchedulerService {
 
 	public Mono<ResponseEntity<Map<String, String>>> addChapter(ChapterModel chapter) {
 		return courseRepo
-				.findById(chapter.getCouserId()).flatMap(course -> {
+				.findById(chapter.getCourseId()).flatMap(course -> {
 
 					int chapterWeight = chapter.getWeight() * chapter.getPageLength();
 					course.setWeight(course.getWeight() + chapterWeight);
@@ -120,7 +120,7 @@ public class CourseSchedulerService {
 
 	public Mono<ResponseEntity<Map<String, String>>> enrollCourse(EnrollmentModel enrollment) {
 		Mono<Boolean> studentExist = studentRepo.existsById(enrollment.getStudentId());
-		Mono<Boolean> courseExist = courseRepo.existsById(enrollment.getCouserId());
+		Mono<Boolean> courseExist = courseRepo.existsById(enrollment.getCourseId());
 		return Mono.zip(studentExist, courseExist)
 				.flatMap(tuple -> {
 					Boolean studentExists = tuple.getT1();
