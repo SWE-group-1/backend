@@ -7,5 +7,7 @@ import reactor.core.publisher.Flux;
 
 @Repository
 public interface ChapterRepo extends ReactiveCrudRepository<ChapterModel, Long> {
-	Flux<CourseModel> findByNameContainingIgnoreCase(String name);
+	Flux<ChapterModel> findByNameContainingIgnoreCase(String name);
+
+	Flux<ChapterModel> findByCourseId(Long id);
 }
