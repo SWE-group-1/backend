@@ -1,41 +1,59 @@
-CREATE TABLE Timeblocks (
-	id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	student_id BIGINT,
-	week_day varchar(10),
-	week_number smallint,
-	start_time timestamp,
-	end_time timestamp,
-	priority INT,
-	FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE
-);
-
+-- Create the Student table
 CREATE TABLE Student (
-	student_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	first_name varchar(100),
-	last_name varchar(100),
-	department varchar(100),
-	year int
+    id BIGSERIAL PRIMARY KEY,
+    student_id VARCHAR(50), 
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    department VARCHAR(100),
+    year INT,
+    grade FLOAT      
 );
 
+-- Create the Course table
 CREATE TABLE Course (
-	course_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	name varchar(100),
-	credit_hour INT
+    course_id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    credit_hour INT
 );
 
+-- Create the Chapter table
 CREATE TABLE Chapter (
-	chapter_id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	name varchar(100),
-	page_length INT,
-	weight INT,
-	course_id INT,
-	FOREIGN KEY (course_id) REFERENCES Course(course_id) ON DELETE CASCADE
+    chapter_id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100),
+    page_length INT,
+    weight INT,
+    course_id BIGINT, 
+    FOREIGN KEY (course_id) REFERENCES Course(course_id) ON DELETE CASCADE
 );
 
+-- Create the Timeblocks table
+CREATE TABLE Timeblocks (
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT,
+    week_day VARCHAR(10),
+    week_number SMALLINT,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
+    priority INT,
+    id_done BOOLEAN, 
+    FOREIGN KEY (student_id) REFERENCES Student(id) ON DELETE CASCADE
+);
+
+-- Create the Deadline table
 CREATE TABLE Deadline (
-	id BIGINT PRIMARY KEY AUTO_INCREMENT,
-	student_id BIGINT,
-	weight INT,
-	end_time TIMESTAMP,
-	FOREIGN KEY (student_id) REFERENCES Student(student_id) ON DELETE CASCADE
+    id BIGSERIAL PRIMARY KEY,
+    student_id BIGINT,
+    weight INT,
+    end_time TIMESTAMP,
+    FOREIGN KEY (student_id) REFERENCES Student(id) ON DELETE CASCADE
+);
+
+-- Create the Enrollment table
+CREATE TABLE Enrollment (
+    student_id BIGINT,
+    course_id BIGINT,
+    year INT,
+    PRIMARY KEY (student_id, course_id),
+    FOREIGN KEY (student_id) REFERENCES Student(id) ON DELETE CASCADE,
+    FOREIGN KEY (course_id) REFERENCES Course(course_id) ON DELETE CASCADE
 );
